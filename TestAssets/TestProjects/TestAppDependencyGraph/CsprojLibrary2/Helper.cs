@@ -2,16 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Diagnostics;
 
-namespace TestApp
+namespace TestLibrary
 {
-    public class Program
+    public static class ProjectC
     {
-        public static int Main(string[] args)
+        public static string GetMessage()
         {
-            Console.WriteLine("This string came from ProjectA");
-            return 0;
+            return "This string came from CsprojLibrary2";
         }
     }
 }

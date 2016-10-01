@@ -40,6 +40,8 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 throw new ArgumentNullException();
             }
 
+            var tempMSBuildProjectTemplate = rootSettings.MSBuildProjectTemplate.DeepClone();
+
             MigrateProject(rootSettings);
 
             if (skipProjectReferences)
@@ -49,13 +51,13 @@ namespace Microsoft.DotNet.ProjectJsonMigration
 
             var projectDependencies = ResolveTransitiveClosureProjectDependencies(rootSettings.ProjectDirectory, rootSettings.ProjectXProjFilePath);
 
-            foreach(var project in projectDependencies)
+            foreach (var project in projectDependencies)
             {
                 var projectDir = Path.GetDirectoryName(project.ProjectFilePath);
                 var settings = new MigrationSettings(projectDir,
                                                      projectDir,
                                                      rootSettings.SdkPackageVersion,
-                                                     rootSettings.MSBuildProjectTemplate);
+                                                     tempMSBuildProjectTemplate.DeepClone());
                 MigrateProject(settings);
             }
         }
@@ -66,7 +68,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
             var projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(rootProject, xprojFile);
             Queue<ProjectDependency> projectsQueue = new Queue<ProjectDependency>(projectDependencies);
 
-            while(projectsQueue.Count() != 0)
+            while (projectsQueue.Count() != 0)
             {
                 var projectDependency = projectsQueue.Dequeue();
 
@@ -80,7 +82,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
                 var projectDir = Path.GetDirectoryName(projectDependency.ProjectFilePath);
                 projectDependencies = _projectDependencyFinder.ResolveProjectDependencies(projectDir);
 
-                foreach(var project in projectDependencies)
+                foreach (var project in projectDependencies)
                 {
                     projectsQueue.Enqueue(project);
                 }
@@ -111,7 +113,7 @@ namespace Microsoft.DotNet.ProjectJsonMigration
         {
             var projectContexts = ProjectContext.CreateContextForEachFramework(migrationSettings.ProjectDirectory);
             var xprojFile = migrationSettings.ProjectXProjFilePath ?? _projectDependencyFinder.FindXprojFile(migrationSettings.ProjectDirectory);
-            
+
             ProjectRootElement xproj = null;
             if (xprojFile != null)
             {
